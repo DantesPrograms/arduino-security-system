@@ -1,0 +1,130 @@
+# Arduino IDE
+*.ino.eep
+*.ino.elf
+*.ino.hex
+*.ino.map
+*.ino.with_bootloader.bin
+*.ino.with_bootloader.hex
+
+# Build directories
+build/
+.build/
+
+# Arduino IDE configuration
+.vscode/
+.idea/
+*.code-workspace
+
+# Platform.io
+.pio/
+.pioenvs/
+.piolibdeps/
+
+# Compiled source
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Packages
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*~
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.bak
+*.cache
+
+# Personal configuration files
+wifi_config.h
+secrets.h
+config_local.h
+
+# Documentation builds
+docs/_build/
+docs/.doctrees/
+
+# Python (if using utilities)
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+venv/
+env/
+
+# Node modules (if web interface uses build tools)
+node_modules/
+npm-debug.log*
+
+# Test output
+test_results/
+coverage/
+
+# IDE specific
+*.sublime-project
+*.sublime-workspace
+
+# Backup files
+*.backup
+*.old
+
+# Certificate files (for HTTPS)
+*.pem
+*.key
+*.crt
+*.cer
+
+# Private keys and credentials
+private_key*
+api_key*
+credentials*
+
+# Ignore local testing files
+test_*
+demo_*
+scratch_*
+
+# Circuit design files (large binary)
+*.fzz~
+*.brd~
+*.sch~
+
+# Documentation drafts
+draft_*
+wip_*
+
+# Large media files
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# Ignore user-specific settings
+user_settings.json
+local_config.ini

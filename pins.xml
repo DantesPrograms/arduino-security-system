@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<circuit>
+  <project>
+    <name>Arduino R4 WiFi Security System</name>
+    <version>1.0</version>
+    <author>Dante D'Abramo</author>
+    <date>2026-01-30</date>
+    <description>PIR Motion Detection Security System with Web Interface</description>
+  </project>
+  
+  <board>
+    <type>Arduino UNO R4 WiFi</type>
+    <microcontroller>Renesas RA4M1</microcontroller>
+    <wifi_module>ESP32-S3</wifi_module>
+    <voltage>5V</voltage>
+  </board>
+  
+  <components>
+    <component id="1">
+      <name>PIR Motion Sensor</name>
+      <type>HC-SR501 or compatible</type>
+      <voltage>5V DC</voltage>
+      <current>65mA (typical)</current>
+      <detection_range>3-7 meters</detection_range>
+      <detection_angle>120 degrees</detection_angle>
+      <notes>Allow 60 seconds warm-up time after power-on</notes>
+    </component>
+    
+    <component id="2">
+      <name>Status LED</name>
+      <type>3mm LED</type>
+      <color>Any (Green recommended)</color>
+      <forward_voltage>2.0V (typical)</forward_voltage>
+      <forward_current>20mA (max)</forward_current>
+      <notes>Indicates ARMED state</notes>
+    </component>
+    
+    <component id="3">
+      <name>Alarm LED</name>
+      <type>5mm LED</type>
+      <color>Red recommended</color>
+      <forward_voltage>2.0V (typical)</forward_voltage>
+      <forward_current>20mA (max)</forward_current>
+      <notes>Indicates ALARM_TRIGGERED state</notes>
+    </component>
+    
+    <component id="4">
+      <name>Piezo Buzzer</name>
+      <type>Active Buzzer</type>
+      <voltage>5V DC</voltage>
+      <current>30mA (typical)</current>
+      <sound_level>85dB at 10cm</sound_level>
+      <notes>Active type (generates tone internally)</notes>
+    </component>
+    
+    <component id="5">
+      <name>Resistor (Status LED)</name>
+      <type>Through-hole resistor</type>
+      <value>220Ω</value>
+      <tolerance>5%</tolerance>
+      <power_rating>1/4W</power_rating>
+      <notes>Current limiting for Status LED</notes>
+    </component>
+    
+    <component id="6">
+      <name>Resistor (Alarm LED)</name>
+      <type>Through-hole resistor</type>
+      <value>220Ω</value>
+      <tolerance>5%</tolerance>
+      <power_rating>1/4W</power_rating>
+      <notes>Current limiting for Alarm LED</notes>
+    </component>
+  </components>
+  
+  <connections>
+    <!-- PIR Motion Sensor -->
+    <connection id="1">
+      <from>
+        <component>PIR Sensor</component>
+        <pin>VCC</pin>
+      </from>
+      <to>
+        <component>Arduino R4 WiFi</component>
+        <pin>5V</pin>
+      </to>
+      <wire_color>Red</wire_color>
+      <signal>Power</signal>
+      <voltage>5V DC</voltage>
+    </connection>
+    
+    <connection id="2">
+      <from>
+        <component>PIR Sensor</component>
+        <pin>GND</pin>
+      </from>
+      <to>
+        <component>Arduino R4 WiFi</component>
+        <pin>GND</pin>
+      </to>
+      <wire_color>Black</wire_color>
+      <signal>Ground</signal>
+      <voltage>0V</voltage>
+    </connection>
+    
+    <connection id="3">
+      <from>
+        <component>PIR Sensor</component>
+        <pin>OUT</pin>
+      </from>
+      <to>
+        <component>Arduino R4 WiFi</component>
+        <pin>D2</pin>
+      </to>
+      <wire_color>Yellow</wire_color>
+      <signal>Digital Input</signal>
+      <voltage>0V/5V (logic level)</voltage>
+      <direction>Input</direction>
+      <notes>HIGH when motion detected</notes>
+    </connection>
+    
+    <!-- Status LED (3mm) -->
+    <connection id="4">
+      <from>
+        <component>Arduino R4 WiFi</component>
+        <pin>D8</pin>
+      </from>
+      <to>
+        <component>Resistor 220Ω (Status)</component>
+        <pin>1</pin>
+      </to>
+      <wire_color>Green</wire_color>
+      <signal>Digital Output</signal>
+      <voltage>0V/5V (logic level)</voltage>
+      <direction>Output</direction>
+    </connection>
+    
+    <connection id="5">
+      <from>
+        <component>Resistor 220Ω (Status)</component>
+        <pin>2</pin>
+      </from>
+      <to>
+        <component>Status LED</component>
+        <pin>Anode (+)</pin>
+      </to>
+      <wire_color>Green</wire_color>
+      <signal>LED Current</signal>
+      <current>~13.6mA</current>
+    </connection>
+    
+    <connection id="6">
+      <from>
+        <component>Status LED</component>
+        <pin>Cathode (-)</pin>
+      </from>
+      <to>
+        <component>Arduino R4 WiFi</component>
+        <pin>GND</pin>
+      </to>
+      <wire_color>Black</wire_color>
+      <signal>Ground</signal>
+      <voltage>0V</voltage>
+    </connection>
+    
+    <!-- Alarm LED (5mm) -->
+    <connection id="7">
+      <from>
+        <component>Arduino R4 WiFi</component>
+        <pin>D9</pin>
+      </from>
+      <to>
+        <component>Resistor 220Ω (Alarm)</component>
+        <pin>1</pin>
+      </to>
+      <wire_color>Orange</wire_color>
+      <signal>Digital Output</signal>
+      <voltage>0V/5V (logic level)</voltage>
+      <direction>Output</direction>
+    </connection>
+    
+    <connection id="8">
+      <from>
+        <component>Resistor 220Ω (Alarm)</component>
+        <pin>2</pin>
+      </from>
+      <to>
+        <component>Alarm LED</component>
+        <pin>Anode (+)</pin>
+      </to>
+      <wire_color>Orange</wire_color>
+      <signal>LED Current</signal>
+      <current>~13.6mA</current>
+    </connection>
+    
+    <connection id="9">
+      <from>
+        <component>Alarm LED</component>
+        <pin>Cathode (-)</pin>
+      </from>
+      <to>
+        <component>Arduino R4 WiFi</component>
+        <pin>GND</pin>
+      </to>
+      <wire_color>Black</wire_color>
+      <signal>Ground</signal>
+      <voltage>0V</voltage>
+    </connection>
+    
+    <!-- Piezo Buzzer -->
+    <connection id="10">
+      <from>
+        <component>Arduino R4 WiFi</component>
+        <pin>D10</pin>
+      </from>
+      <to>
+        <component>Piezo Buzzer</component>
+        <pin>Positive (+)</pin>
+      </to>
+      <wire_color>Blue</wire_color>
+      <signal>Digital Output</signal>
+      <voltage>0V/5V (logic level)</voltage>
+      <direction>Output</direction>
+      <notes>Pulsing pattern: 500ms on/off</notes>
+    </connection>
+    
+    <connection id="11">
+      <from>
+        <component>Piezo Buzzer</component>
+        <pin>Negative (-)</pin>
+      </from>
+      <to>
+        <component>Arduino R4 WiFi</component>
+        <pin>GND</pin>
+      </to>
+      <wire_color>Black</wire_color>
+      <signal>Ground</signal>
+      <voltage>0V</voltage>
+    </connection>
+  </connections>
+  
+  <pin_summary>
+    <pin name="D2" type="INPUT" function="PIR Motion Sensor Output" />
+    <pin name="D8" type="OUTPUT" function="Status LED Control (via 220Ω)" />
+    <pin name="D9" type="OUTPUT" function="Alarm LED Control (via 220Ω)" />
+    <pin name="D10" type="OUTPUT" function="Buzzer Control" />
+    <pin name="5V" type="POWER" function="Power Supply for all components" />
+    <pin name="GND" type="GROUND" function="Common ground for all components" />
+  </pin_summary>
+  
+  <power_analysis>
+    <total_current>
+      <maximum>108.2mA</maximum>
+      <typical>65mA</typical>
+      <notes>Assumes all outputs active simultaneously</notes>
+    </total_current>
+    
+    <breakdown>
+      <component name="PIR Sensor">
+        <current>65mA</current>
+        <notes>Typical operating current</notes>
+      </component>
+      <component name="Status LED">
+        <current>13.6mA</current>
+        <calculation>(5V - 2V) / 220Ω = 13.6mA</calculation>
+      </component>
+      <component name="Alarm LED">
+        <current>13.6mA</current>
+        <calculation>(5V - 2V) / 220Ω = 13.6mA</calculation>
+      </component>
+      <component name="Piezo Buzzer">
+        <current>30mA</current>
+        <notes>Typical for active buzzer</notes>
+      </component>
+    </breakdown>
+    
+    <gpio_current>
+      <total>57.2mA</total>
+      <per_pin_limit>8mA (recommended), 20mA (absolute max)</per_pin_limit>
+      <status>WARNING: LEDs exceed 8mA recommendation</status>
+      <recommendation>Current design is within absolute maximum ratings but exceeds recommended levels. Consider using transistors for switching if concerned about long-term reliability.</recommendation>
+    </gpio_current>
+  </power_analysis>
+  
+  <assembly_notes>
+    <note priority="high">
+      Verify LED polarity before connecting. Longer leg is anode (+), shorter leg is cathode (-).
+    </note>
+    <note priority="high">
+      Ensure PIR sensor is properly oriented. The sensor dome should face the detection area.
+    </note>
+    <note priority="medium">
+      PIR sensor requires 60 seconds to stabilize after power-on before reliable detection.
+    </note>
+    <note priority="medium">
+      Active buzzer has polarity. Connect positive terminal to D10, negative to GND.
+    </note>
+    <note priority="low">
+      Use color-coded jumper wires for easier troubleshooting and maintenance.
+    </note>
+    <note priority="low">
+      Consider using a breadboard for initial prototyping before permanent installation.
+    </note>
+  </assembly_notes>
+  
+  <testing_procedure>
+    <step number="1">
+      Connect all components according to pin diagram without powering on
+    </step>
+    <step number="2">
+      Double-check all connections, especially power and ground
+    </step>
+    <step number="3">
+      Upload firmware to Arduino R4 WiFi via USB-C
+    </step>
+    <step number="4">
+      Open Serial Monitor at 115200 baud
+    </step>
+    <step number="5">
+      Verify WiFi connection and note IP address
+    </step>
+    <step number="6">
+      Test Status LED by arming system via web interface
+    </step>
+    <step number="7">
+      Wait 60 seconds for PIR sensor stabilization
+    </step>
+    <step number="8">
+      Trigger PIR sensor with hand motion
+    </step>
+    <step number="9">
+      Verify Alarm LED and Buzzer activate
+    </step>
+    <step number="10">
+      Disarm system via web interface to stop alarm
+    </step>
+  </testing_procedure>
+  
+  <safety_warnings>
+    <warning type="electrical">
+      Do not exceed GPIO current limits. Each pin is rated for maximum 8mA continuous (20mA absolute max).
+    </warning>
+    <warning type="electrical">
+      Ensure proper current-limiting resistors are used for LEDs to prevent damage.
+    </warning>
+    <warning type="electrical">
+      Never connect components directly to mains voltage. System operates at 5V DC only.
+    </warning>
+    <warning type="mechanical">
+      PIR sensor contains a Fresnel lens. Handle carefully to avoid damage.
+    </warning>
+    <warning type="operational">
+      This is an educational/demonstration project. Not suitable for critical security applications.
+    </warning>
+  </safety_warnings>
+  
+  <revision_history>
+    <revision version="1.0" date="2026-01-30">
+      Initial release - Basic security system with PIR, LEDs, buzzer, and web interface
+    </revision>
+  </revision_history>
+</circuit>
