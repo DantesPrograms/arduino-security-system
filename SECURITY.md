@@ -263,7 +263,7 @@ Best practices inspired by:
 
 - **Security Issues**: dantesprograms@gmail.com (placeholder)
 - **General Issues**: GitHub Issues
-- **Project**: https://github.com/yourusername/arduino-security-system
+- **Project**: https://github.com/DantesPrograms/arduino-security-system
 
 ## Acknowledgments
 
