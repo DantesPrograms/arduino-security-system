@@ -16,11 +16,11 @@
 
 // ==================== CONFIGURATION ====================
 // Update these with your WiFi credentials
-const char* ssid = "WIFI_SSID";
-const char* password = "WIFI_PWORD";
+const char* ssid = "YOUR_WIFI_SSID";
+const char* password = "YOUR_WIFI_PASSWORD";
 
 // Security PIN
-const String SECURITY_PIN = "0421";
+const String SECURITY_PIN = "1234";
 
 // Pin Definitions
 const int PIR_PIN = 2;
@@ -326,29 +326,43 @@ void serveLoginPage(WiFiClient& client, String errorMsg) {
   html += "Connection: close\r\n\r\n";
   html += "<!DOCTYPE HTML><html><head>";
   html += "<meta name='viewport' content='width=device-width, initial-scale=1'>";
+  html += "<link href='https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap' rel='stylesheet'>";
   html += "<style>";
-  html += "body{font-family:Arial;text-align:center;margin:50px;background:#f0f0f0;}";
-  html += "h1{color:#333;}";
-  html += ".container{background:white;padding:30px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1);max-width:400px;margin:auto;}";
-  html += "input{font-size:18px;padding:12px;width:80%;margin:10px 0;border:2px solid #ddd;border-radius:5px;text-align:center;}";
-  html += "button{font-size:18px;padding:15px 30px;margin:10px;border:none;border-radius:5px;cursor:pointer;background:#4CAF50;color:white;width:80%;}";
-  html += "button:hover{background:#45a049;}";
-  html += ".error{color:#f44336;margin:10px;padding:10px;background:#ffebee;border-radius:5px;}";
-  html += ".lock{font-size:60px;margin:20px;}";
+  html += "*{margin:0;padding:0;box-sizing:border-box;}";
+  html += "body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}";
+  html += ".container{background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);padding:50px 40px;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.3);max-width:420px;width:100%;animation:slideUp 0.6s ease;}";
+  html += "@keyframes slideUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}";
+  html += ".logo{width:80px;height:80px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 30px;box-shadow:0 10px 30px rgba(102,126,234,0.4);}";
+  html += ".logo svg{width:45px;height:45px;}";
+  html += "h1{font-size:28px;font-weight:700;color:#1a202c;text-align:center;margin-bottom:10px;}";
+  html += ".subtitle{font-size:15px;color:#64748b;text-align:center;margin-bottom:40px;font-weight:400;}";
+  html += "form{display:flex;flex-direction:column;gap:20px;}";
+  html += ".input-group{position:relative;}";
+  html += "input{font-family:'DM Sans',sans-serif;font-size:16px;padding:16px 20px;width:100%;border:2px solid #e2e8f0;border-radius:12px;background:#f8fafc;transition:all 0.3s ease;font-weight:500;}";
+  html += "input:focus{outline:none;border-color:#667eea;background:#fff;box-shadow:0 0 0 4px rgba(102,126,234,0.1);}";
+  html += "input::placeholder{color:#94a3b8;font-weight:400;}";
+  html += "button{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;padding:16px;border:none;border-radius:12px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;cursor:pointer;transition:all 0.3s ease;box-shadow:0 4px 15px rgba(102,126,234,0.4);}";
+  html += "button:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(102,126,234,0.5);}";
+  html += "button:active{transform:translateY(0);}";
+  html += ".error{background:#fee;border:2px solid #fcc;color:#c33;padding:14px 18px;border-radius:12px;margin-bottom:20px;font-size:14px;font-weight:500;animation:shake 0.4s ease;}";
+  html += "@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-10px);}75%{transform:translateX(10px);}}";
+  html += ".footer{text-align:center;margin-top:30px;font-size:13px;color:#94a3b8;}";
+  html += "@media(max-width:480px){.container{padding:40px 30px;}h1{font-size:24px;}}";
   html += "</style></head><body>";
   html += "<div class='container'>";
-  html += "<div class='lock'>🔒</div>";
+  html += "<div class='logo'><svg viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='11' width='18' height='11' rx='2' ry='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg></div>";
   html += "<h1>Security System</h1>";
-  html += "<h2>Enter PIN</h2>";
+  html += "<div class='subtitle'>Enter your PIN to continue</div>";
   
   if (errorMsg.length() > 0) {
     html += "<div class='error'>" + errorMsg + "</div>";
   }
   
   html += "<form method='POST' action='/login'>";
-  html += "<input type='password' name='pin' maxlength='4' pattern='[0-9]{4}' placeholder='Enter 4-digit PIN' required autofocus>";
-  html += "<button type='submit'>UNLOCK</button>";
+  html += "<div class='input-group'><input type='password' name='pin' maxlength='4' pattern='[0-9]{4}' placeholder='Enter 4-digit PIN' required autofocus></div>";
+  html += "<button type='submit'>Unlock System</button>";
   html += "</form>";
+  html += "<div class='footer'>Arduino R4 WiFi Security v1.0</div>";
   html += "</div></body></html>";
   
   client.print(html);
@@ -415,49 +429,87 @@ void serveWebPage(WiFiClient& client) {
   html += "Connection: close\r\n\r\n";
   html += "<!DOCTYPE HTML><html><head>";
   html += "<meta name='viewport' content='width=device-width, initial-scale=1'>";
+  html += "<link href='https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap' rel='stylesheet'>";
   html += "<style>";
-  html += "body{font-family:Arial;text-align:center;margin:50px;background:#f0f0f0;}";
-  html += "h1{color:#333;}";
-  html += ".container{background:white;padding:30px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1);max-width:500px;margin:auto;}";
-  html += ".status{font-size:24px;margin:20px;padding:15px;border-radius:5px;}";
-  html += ".disarmed{background:#90EE90;color:#006400;}";
-  html += ".armed{background:#FFD700;color:#8B4500;}";
-  html += ".alarm{background:#FF6347;color:#8B0000;animation:blink 1s infinite;}";
-  html += "@keyframes blink{0%,50%{opacity:1;}51%,100%{opacity:0.5;}}";
-  html += "button{font-size:18px;padding:15px 30px;margin:10px;border:none;border-radius:5px;cursor:pointer;transition:0.3s;}";
-  html += ".arm-btn{background:#4CAF50;color:white;}.arm-btn:hover{background:#45a049;}";
-  html += ".disarm-btn{background:#f44336;color:white;}.disarm-btn:hover{background:#da190b;}";
-  html += ".info{margin-top:30px;padding:15px;background:#e3f2fd;border-radius:5px;font-size:14px;}";
+  html += "*{margin:0;padding:0;box-sizing:border-box;}";
+  html += "body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px;}";
+  html += ".container{max-width:800px;margin:0 auto;}";
+  html += ".header{text-align:center;color:white;margin-bottom:30px;animation:fadeIn 0.6s ease;}";
+  html += "@keyframes fadeIn{from{opacity:0;transform:translateY(-20px);}to{opacity:1;transform:translateY(0);}}";
+  html += ".header h1{font-size:32px;font-weight:700;margin-bottom:8px;text-shadow:0 2px 10px rgba(0,0,0,0.2);}";
+  html += ".header p{font-size:16px;font-weight:400;opacity:0.9;}";
+  html += ".card{background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);border-radius:24px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3);margin-bottom:20px;animation:slideUp 0.6s ease;}";
+  html += "@keyframes slideUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}";
+  html += ".status-badge{display:inline-block;padding:20px 40px;border-radius:16px;font-size:24px;font-weight:700;margin:20px 0;text-align:center;width:100%;transition:all 0.3s ease;}";
+  html += ".status-disarmed{background:linear-gradient(135deg,#10b981,#059669);color:white;box-shadow:0 8px 24px rgba(16,185,129,0.4);}";
+  html += ".status-armed{background:linear-gradient(135deg,#f59e0b,#d97706);color:white;box-shadow:0 8px 24px rgba(245,158,11,0.4);}";
+  html += ".status-alarm{background:linear-gradient(135deg,#ef4444,#dc2626);color:white;box-shadow:0 8px 24px rgba(239,68,68,0.4);animation:pulse 1.5s infinite;}";
+  html += "@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.02);}}";
+  html += ".controls{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin:30px 0;}";
+  html += ".btn{font-family:'DM Sans',sans-serif;padding:18px 24px;border:none;border-radius:14px;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.3s ease;text-align:center;}";
+  html += ".btn-arm{background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;box-shadow:0 4px 15px rgba(59,130,246,0.4);}";
+  html += ".btn-arm:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(59,130,246,0.5);}";
+  html += ".btn-disarm{background:linear-gradient(135deg,#10b981,#059669);color:white;box-shadow:0 4px 15px rgba(16,185,129,0.4);}";
+  html += ".btn-disarm:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(16,185,129,0.5);}";
+  html += ".btn:active{transform:translateY(0);}";
+  html += ".info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin:25px 0;padding:25px;background:rgba(100,116,139,0.08);border-radius:16px;}";
+  html += ".info-item{text-align:center;}";
+  html += ".info-label{font-size:12px;color:#64748b;font-weight:500;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}";
+  html += ".info-value{font-size:18px;color:#1e293b;font-weight:700;}";
+  html += ".logout-btn{width:100%;padding:14px;margin-top:15px;background:rgba(100,116,139,0.1);color:#64748b;border:2px solid rgba(100,116,139,0.2);border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.3s ease;}";
+  html += ".logout-btn:hover{background:rgba(100,116,139,0.15);border-color:rgba(100,116,139,0.3);}";
+  html += ".divider{height:2px;background:linear-gradient(90deg,transparent,rgba(100,116,139,0.2),transparent);margin:25px 0;}";
+  html += "@media(max-width:640px){.controls{grid-template-columns:1fr;}.info-grid{grid-template-columns:1fr;}}";
   html += "</style></head><body>";
   html += "<div class='container'>";
-  html += "<h1>🔒 Security System</h1>";
-  html += "<div class='status ";
+  html += "<div class='header'>";
+  html += "<h1>Security System</h1>";
+  html += "<p>Real-time monitoring and control</p>";
+  html += "</div>";
+  html += "<div class='card'>";
   
+  // Status badge with appropriate styling
+  html += "<div class='status-badge ";
   switch (currentState) {
     case DISARMED:
-      html += "disarmed'>DISARMED</div>";
+      html += "status-disarmed'>SYSTEM DISARMED</div>";
+      html += "<p style='text-align:center;color:#64748b;margin-top:10px;font-size:14px;'>System is inactive and not monitoring</p>";
       break;
     case ARMED:
-      html += "armed'>ARMED</div>";
+      html += "status-armed'>SYSTEM ARMED</div>";
+      html += "<p style='text-align:center;color:#64748b;margin-top:10px;font-size:14px;'>Monitoring for motion activity</p>";
       break;
     case ALARM_TRIGGERED:
-      html += "alarm'>⚠️ ALARM TRIGGERED ⚠️</div>";
+      html += "status-alarm'>ALARM ACTIVE</div>";
+      html += "<p style='text-align:center;color:#dc2626;margin-top:10px;font-size:14px;font-weight:600;'>Motion detected! Disarm to stop alarm</p>";
       break;
   }
   
+  html += "<div class='divider'></div>";
+  
+  // Control buttons
   html += "<form method='POST'>";
-  html += "<button class='arm-btn' formaction='/arm'>ARM SYSTEM</button>";
-  html += "<button class='disarm-btn' formaction='/disarm'>DISARM SYSTEM</button>";
+  html += "<div class='controls'>";
+  html += "<button class='btn btn-arm' formaction='/arm'>Arm System</button>";
+  html += "<button class='btn btn-disarm' formaction='/disarm'>Disarm System</button>";
+  html += "</div>";
   html += "</form>";
+  
+  // System info grid
+  html += "<div class='info-grid'>";
+  html += "<div class='info-item'><div class='info-label'>PIR Sensor</div><div class='info-value'>Pin D2</div></div>";
+  html += "<div class='info-item'><div class='info-label'>Status LED</div><div class='info-value'>Pin D8</div></div>";
+  html += "<div class='info-item'><div class='info-label'>Alarm LED</div><div class='info-value'>Pin D9</div></div>";
+  html += "<div class='info-item'><div class='info-label'>Buzzer</div><div class='info-value'>Pin D10</div></div>";
+  html += "</div>";
+  
+  html += "<div class='divider'></div>";
+  
+  // Logout button
   html += "<form method='GET' action='/logout'>";
-  html += "<button style='background:#757575;color:white;font-size:14px;padding:10px 20px;margin-top:20px;' type='submit'>LOGOUT</button>";
+  html += "<button class='logout-btn' type='submit'>Logout</button>";
   html += "</form>";
-  html += "<div class='info'>";
-  html += "<strong>System Info:</strong><br>";
-  html += "PIR Sensor: Pin D2<br>";
-  html += "Status LED: Pin D8<br>";
-  html += "Alarm LED: Pin D9<br>";
-  html += "Buzzer: Pin D10";
+  
   html += "</div></div>";
   html += "<script>setTimeout(function(){location.reload();},3000);</script>";
   html += "</body></html>";
