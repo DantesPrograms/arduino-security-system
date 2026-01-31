@@ -261,7 +261,7 @@ Best practices inspired by:
 
 ### Contact
 
-- **Security Issues**: security@your-domain.com (placeholder)
+- **Security Issues**: dantesprograms@gmail.com (placeholder)
 - **General Issues**: GitHub Issues
 - **Project**: https://github.com/yourusername/arduino-security-system
 
