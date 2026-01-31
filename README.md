@@ -132,7 +132,7 @@ const char* password = "YOUR_WIFI_PASSWORD"; // Your WiFi password
 
 ### Security PIN
 
-Default PIN is **0421**. To change:
+Default PIN is **1234**. To change:
 
 ```cpp
 const String SECURITY_PIN = "1234";  // Change to your 4-digit PIN
