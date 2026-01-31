@@ -440,18 +440,22 @@ void serveWebPage(WiFiClient& client) {
   html += ".header p{font-size:16px;font-weight:400;opacity:0.9;}";
   html += ".card{background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);border-radius:24px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3);margin-bottom:20px;animation:slideUp 0.6s ease;}";
   html += "@keyframes slideUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}";
-  html += ".status-badge{display:inline-block;padding:20px 40px;border-radius:16px;font-size:24px;font-weight:700;margin:20px 0;text-align:center;width:100%;transition:all 0.3s ease;}";
+  html += ".status-badge{display:inline-block;padding:20px 40px;border-radius:16px;font-size:24px;font-weight:700;margin:20px 0;text-align:center;width:100%;transition:all 0.4s ease;}";
   html += ".status-disarmed{background:linear-gradient(135deg,#10b981,#059669);color:white;box-shadow:0 8px 24px rgba(16,185,129,0.4);}";
   html += ".status-armed{background:linear-gradient(135deg,#f59e0b,#d97706);color:white;box-shadow:0 8px 24px rgba(245,158,11,0.4);}";
   html += ".status-alarm{background:linear-gradient(135deg,#ef4444,#dc2626);color:white;box-shadow:0 8px 24px rgba(239,68,68,0.4);animation:pulse 1.5s infinite;}";
   html += "@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.02);}}";
+  html += ".status-message{text-align:center;color:#64748b;margin-top:10px;font-size:14px;transition:all 0.3s ease;}";
   html += ".controls{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin:30px 0;}";
-  html += ".btn{font-family:'DM Sans',sans-serif;padding:18px 24px;border:none;border-radius:14px;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.3s ease;text-align:center;}";
+  html += ".btn{font-family:'DM Sans',sans-serif;padding:18px 24px;border:none;border-radius:14px;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.3s ease;text-align:center;position:relative;overflow:hidden;}";
+  html += ".btn:disabled{opacity:0.5;cursor:not-allowed;}";
   html += ".btn-arm{background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;box-shadow:0 4px 15px rgba(59,130,246,0.4);}";
-  html += ".btn-arm:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(59,130,246,0.5);}";
+  html += ".btn-arm:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 20px rgba(59,130,246,0.5);}";
   html += ".btn-disarm{background:linear-gradient(135deg,#10b981,#059669);color:white;box-shadow:0 4px 15px rgba(16,185,129,0.4);}";
-  html += ".btn-disarm:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(16,185,129,0.5);}";
-  html += ".btn:active{transform:translateY(0);}";
+  html += ".btn-disarm:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 20px rgba(16,185,129,0.5);}";
+  html += ".btn:active:not(:disabled){transform:translateY(0);}";
+  html += ".btn.loading::after{content:'';position:absolute;top:50%;left:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border:3px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.8s linear infinite;}";
+  html += "@keyframes spin{to{transform:rotate(360deg);}}";
   html += ".info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin:25px 0;padding:25px;background:rgba(100,116,139,0.08);border-radius:16px;}";
   html += ".info-item{text-align:center;}";
   html += ".info-label{font-size:12px;color:#64748b;font-weight:500;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}";
@@ -459,41 +463,28 @@ void serveWebPage(WiFiClient& client) {
   html += ".logout-btn{width:100%;padding:14px;margin-top:15px;background:rgba(100,116,139,0.1);color:#64748b;border:2px solid rgba(100,116,139,0.2);border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.3s ease;}";
   html += ".logout-btn:hover{background:rgba(100,116,139,0.15);border-color:rgba(100,116,139,0.3);}";
   html += ".divider{height:2px;background:linear-gradient(90deg,transparent,rgba(100,116,139,0.2),transparent);margin:25px 0;}";
+  html += ".update-indicator{display:inline-block;width:8px;height:8px;background:#10b981;border-radius:50%;margin-left:8px;animation:blink 2s infinite;}";
+  html += "@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}";
   html += "@media(max-width:640px){.controls{grid-template-columns:1fr;}.info-grid{grid-template-columns:1fr;}}";
   html += "</style></head><body>";
   html += "<div class='container'>";
   html += "<div class='header'>";
   html += "<h1>Security System</h1>";
-  html += "<p>Real-time monitoring and control</p>";
+  html += "<p>Real-time monitoring and control<span class='update-indicator'></span></p>";
   html += "</div>";
   html += "<div class='card'>";
   
-  // Status badge with appropriate styling
-  html += "<div class='status-badge ";
-  switch (currentState) {
-    case DISARMED:
-      html += "status-disarmed'>SYSTEM DISARMED</div>";
-      html += "<p style='text-align:center;color:#64748b;margin-top:10px;font-size:14px;'>System is inactive and not monitoring</p>";
-      break;
-    case ARMED:
-      html += "status-armed'>SYSTEM ARMED</div>";
-      html += "<p style='text-align:center;color:#64748b;margin-top:10px;font-size:14px;'>Monitoring for motion activity</p>";
-      break;
-    case ALARM_TRIGGERED:
-      html += "status-alarm'>ALARM ACTIVE</div>";
-      html += "<p style='text-align:center;color:#dc2626;margin-top:10px;font-size:14px;font-weight:600;'>Motion detected! Disarm to stop alarm</p>";
-      break;
-  }
+  // Status badge - will be updated via AJAX
+  html += "<div id='statusBadge' class='status-badge'></div>";
+  html += "<p id='statusMessage' class='status-message'></p>";
   
   html += "<div class='divider'></div>";
   
   // Control buttons
-  html += "<form method='POST'>";
   html += "<div class='controls'>";
-  html += "<button class='btn btn-arm' formaction='/arm'>Arm System</button>";
-  html += "<button class='btn btn-disarm' formaction='/disarm'>Disarm System</button>";
+  html += "<button class='btn btn-arm' id='armBtn' onclick='controlSystem(\"arm\")'>Arm System</button>";
+  html += "<button class='btn btn-disarm' id='disarmBtn' onclick='controlSystem(\"disarm\")'>Disarm System</button>";
   html += "</div>";
-  html += "</form>";
   
   // System info grid
   html += "<div class='info-grid'>";
@@ -511,7 +502,58 @@ void serveWebPage(WiFiClient& client) {
   html += "</form>";
   
   html += "</div></div>";
-  html += "<script>setTimeout(function(){location.reload();},3000);</script>";
+  
+  // JavaScript for AJAX updates
+  html += "<script>";
+  html += "let isUpdating=false;";
+  
+  // Function to update status display
+  html += "function updateStatus(){";
+  html += "fetch('/status').then(r=>r.json()).then(data=>{";
+  html += "const badge=document.getElementById('statusBadge');";
+  html += "const msg=document.getElementById('statusMessage');";
+  html += "badge.className='status-badge';";
+  html += "if(data.state==='DISARMED'){";
+  html += "badge.className+=' status-disarmed';";
+  html += "badge.textContent='SYSTEM DISARMED';";
+  html += "msg.textContent='System is inactive and not monitoring';";
+  html += "msg.style.color='#64748b';";
+  html += "}else if(data.state==='ARMED'){";
+  html += "badge.className+=' status-armed';";
+  html += "badge.textContent='SYSTEM ARMED';";
+  html += "msg.textContent='Monitoring for motion activity';";
+  html += "msg.style.color='#64748b';";
+  html += "}else if(data.state==='ALARM_TRIGGERED'){";
+  html += "badge.className+=' status-alarm';";
+  html += "badge.textContent='ALARM ACTIVE';";
+  html += "msg.textContent='Motion detected! Disarm to stop alarm';";
+  html += "msg.style.color='#dc2626';";
+  html += "msg.style.fontWeight='600';";
+  html += "}";
+  html += "}).catch(e=>console.error('Update failed:',e));";
+  html += "}";
+  
+  // Function to control system (arm/disarm)
+  html += "function controlSystem(action){";
+  html += "if(isUpdating)return;";
+  html += "isUpdating=true;";
+  html += "const btn=document.getElementById(action+'Btn');";
+  html += "const originalText=btn.textContent;";
+  html += "btn.classList.add('loading');";
+  html += "btn.disabled=true;";
+  html += "btn.textContent='';";
+  html += "fetch('/'+action,{method:'POST'})";
+  html += ".then(()=>{";
+  html += "setTimeout(()=>{updateStatus();isUpdating=false;btn.classList.remove('loading');btn.disabled=false;btn.textContent=originalText;},500);";
+  html += "})";
+  html += ".catch(e=>{console.error('Control failed:',e);isUpdating=false;btn.classList.remove('loading');btn.disabled=false;btn.textContent=originalText;});";
+  html += "}";
+  
+  // Initial update and periodic refresh
+  html += "updateStatus();";
+  html += "setInterval(updateStatus,2000);";
+  html += "</script>";
+  
   html += "</body></html>";
   
   client.print(html);
