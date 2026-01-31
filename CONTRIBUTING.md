@@ -4,46 +4,12 @@ Thank you for your interest in contributing to this project! This document provi
 
 ## 📋 Table of Contents
 
-- [Code of Conduct](#code-of-conduct)
 - [How Can I Contribute?](#how-can-i-contribute)
 - [Development Setup](#development-setup)
 - [Coding Standards](#coding-standards)
 - [Submission Guidelines](#submission-guidelines)
 - [Testing Requirements](#testing-requirements)
 - [Documentation Standards](#documentation-standards)
-
-## 🤝 Code of Conduct
-
-### Our Pledge
-
-We are committed to providing a welcoming and inclusive experience for everyone, regardless of:
-- Level of experience
-- Gender identity and expression
-- Sexual orientation
-- Disability
-- Personal appearance
-- Body size
-- Race
-- Ethnicity
-- Age
-- Religion
-- Nationality
-
-### Our Standards
-
-**Positive behaviors include:**
-- Using welcoming and inclusive language
-- Being respectful of differing viewpoints
-- Gracefully accepting constructive criticism
-- Focusing on what is best for the community
-- Showing empathy towards others
-
-**Unacceptable behaviors include:**
-- Harassment or discriminatory comments
-- Personal or political attacks
-- Public or private harassment
-- Publishing others' private information without permission
-- Other conduct inappropriate in a professional setting
 
 ## 💡 How Can I Contribute?
 
@@ -459,3 +425,4 @@ By contributing, you agree that your contributions will be licensed under the MI
 **Thank you for contributing to making this project better!** 🙏
 
 *Last Updated: January 30, 2026*
+
