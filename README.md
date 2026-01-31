@@ -176,7 +176,7 @@ System State: DISARMED
 ### Web Interface Access
 
 1. Open browser and go to `http://[ARDUINO_IP_ADDRESS]`
-2. Enter PIN: **0421** (or your custom PIN)
+2. Enter PIN: **1234** (or your custom PIN)
 3. Click **UNLOCK** to access controls
 
 ### Operating the System
