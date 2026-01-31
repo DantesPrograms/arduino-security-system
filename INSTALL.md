@@ -262,16 +262,16 @@ const char* password = "MyWiFiPassword123"; // Your WiFi password
 
 ### Step 2: Configure PIN (Optional)
 
-Default PIN is **0421**. To change:
+Default PIN is **1234**. To change:
 
 ```cpp
 // Security PIN
-const String SECURITY_PIN = "0421";  // Change to your desired PIN
+const String SECURITY_PIN = "1234";  // Change to your desired PIN
 ```
 
 Example:
 ```cpp
-const String SECURITY_PIN = "1234";  // Your custom PIN
+const String SECURITY_PIN = "9086";  // Your custom PIN
 ```
 
 **PIN Requirements:**
@@ -569,3 +569,4 @@ After successful installation:
 **Congratulations on completing the installation!** 🎉
 
 *Last Updated: January 30, 2026*
+
