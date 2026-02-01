@@ -1,16 +1,16 @@
-/*
- * Arduino R4 WiFi Security System
- * PIR Motion Detection with Web-Controlled Arm/Disarm
- * 
- * Author: Dante D'Abramo
- * Date: 2026-01-30
- * 
- * Hardware Connections:
- * - PIR Sensor Output: D2
- * - Status LED (3mm): D8
- * - Alarm LED (5mm): D9
- * - Piezo Buzzer: D10
- */
+/* 
+* Arduino R4 WiFi Security System 
+* PIR Motion Detection with Web-Controlled Arm/Disarm 
+* 
+* Author: Dante D'Abramo 
+* Date: 2026-02-01 
+* 
+* Hardware Connections: 
+* - PIR Sensor Output: D2 - Not used 
+* - ECHO Pin: 4 * - TRIG Pin: 3 
+* - Status LED (3mm): D8 * - Alarm LED (5mm): D9 
+* - Piezo Buzzer: D10 
+*/
 
 #include <WiFiS3.h>
 
@@ -20,7 +20,7 @@ const char* ssid = "YOUR_WIFI_SSID";
 const char* password = "YOUR_WIFI_PASSWORD";
 
 // Security PIN
-const String SECURITY_PIN = "1234";
+const String SECURITY_PIN = "0421";
 
 // Pin Definitions
 // const int PIR_PIN = 2;  // Not used - ultrasonic only
