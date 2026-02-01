@@ -19,6 +19,103 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Battery backup monitoring
 - Tamper detection on enclosure
 
+## [1.2.0] - 2026-01-31
+
+### Changed
+- **Removed PIR sensor** - System now uses ultrasonic sensor only
+- Simplified codebase by removing all PIR-related code
+- Cleaner, more maintainable code structure
+- Reduced component count (11 items instead of 12)
+- Lower total cost ($36-50 vs $42-60)
+
+### Removed
+- PIR motion sensor (HC-SR501)
+- PIR debouncing and filtering code
+- PIR pin assignment (D2 now available)
+- Backup sensor redundancy
+
+### Improved
+- Simpler wiring (4 fewer connections)
+- Easier troubleshooting (single sensor to debug)
+- More reliable detection (no heat-based false alarms)
+- Faster system response (no dual-sensor coordination)
+
+### Technical Details
+- Removed Components:
+  - HC-SR501 PIR sensor
+  - Associated debouncing variables
+  - PIR confirmation logic
+- Pin D2 now unused (available for future expansion)
+- Power consumption reduced to ~58mA max (was ~123mA)
+- Code size reduced by ~60 lines
+
+### Why This Change?
+Based on user feedback, PIR sensors caused too many false alarms due to heat sensitivity. The ultrasonic sensor alone provides more reliable distance-based motion detection without the hassle of PIR calibration and false positives.
+
+## [1.1.0] - 2026-01-31
+
+### Added
+- **HC-SR04 Ultrasonic Sensor** as primary motion detection
+  - Distance-based detection (no heat sensitivity)
+  - Configurable detection range (default 150cm)
+  - Adjustable movement threshold (default 30cm)
+  - Baseline distance measurement when armed
+- **Dual-sensor architecture** for improved reliability
+  - Ultrasonic as primary sensor
+  - PIR as backup sensor
+  - Either sensor can independently trigger alarm
+- **Smart PIR filtering** to reduce false positives
+  - Requires 2+ confirmations within 5 seconds
+  - 2 second debounce between triggers
+  - Filters single random heat triggers
+- **AJAX-powered web interface**
+  - Status updates without page reload
+  - Smooth transitions between states
+  - Loading animations on button clicks
+  - Real-time blinking status indicator
+- **Enhanced Serial Monitor output**
+  - Detailed ultrasonic detection logging
+  - PIR confirmation progress messages
+  - Baseline distance reporting
+- **Tunable detection parameters** in code
+  - Easy adjustment for different room sizes
+  - Configurable sensitivity levels
+  - Customizable check intervals
+
+### Changed
+- PIR sensor role changed from primary to backup
+- Web interface now updates every 2 seconds (was 3 seconds)
+- Pin D3 and D4 now used for ultrasonic sensor
+- System info panel updated to show all sensor pins
+- Power consumption increased to ~123mA max (was ~108mA)
+
+### Technical Details
+- New Pin Assignments:
+  - D3: Ultrasonic TRIG (new)
+  - D4: Ultrasonic ECHO (new)
+  - D2: PIR OUT (unchanged, now backup)
+- New Detection Functions:
+  - `getDistance()` - Measures distance via ultrasonic
+  - `checkUltrasonicMotion()` - Primary motion detection
+  - Enhanced `handleArmedState()` - Dual-sensor logic
+- New Configuration Constants:
+  - `DETECTION_DISTANCE` (150cm default)
+  - `DISTANCE_CHANGE_THRESHOLD` (30cm default)
+  - `DISTANCE_CHECK_INTERVAL` (500ms default)
+
+### Fixed
+- Eliminated most PIR heat-based false alarms
+- Improved detection reliability in bedrooms
+- Better handling of environmental heat changes
+- More stable motion detection overall
+
+### Documentation
+- Updated README.md with dual-sensor information
+- Updated pins.xml with HC-SR04 specifications
+- Updated INSTALL.md with ultrasonic wiring
+- Added tuning parameters guide
+- Enhanced troubleshooting section
+
 ## [1.0.0] - 2026-01-30
 
 ### Added
@@ -165,7 +262,7 @@ For questions and support:
 
 ## Links
 
-- **Repository**: https://github.com/yourusername/arduino-security-system
+- **Repository**: https://github.com/DantesPrograms/arduino-security-system/
 - **Documentation**: See README.md
 - **License**: MIT License (see LICENSE.md)
 - **Author**: Dante D'Abramo
