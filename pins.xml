@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <circuit>
   <project>
-    <name>Arduino R4 WiFi Security System</name>
-    <version>1.0</version>
+    <n>Arduino R4 WiFi Security System</n>
+    <version>1.2</version>
     <author>Dante D'Abramo</author>
-    <date>2026-01-30</date>
-    <description>PIR Motion Detection Security System with Web Interface</description>
+    <date>2026-01-31</date>
+    <description>Ultrasonic-Only Motion Detection Security System with Web Interface</description>
   </project>
   
   <board>
@@ -17,17 +17,17 @@
   
   <components>
     <component id="1">
-      <name>PIR Motion Sensor</name>
-      <type>HC-SR501 or compatible</type>
+      <n>HC-SR04 Ultrasonic Sensor</n>
+      <type>Distance measurement sensor</type>
       <voltage>5V DC</voltage>
-      <current>65mA (typical)</current>
-      <detection_range>3-7 meters</detection_range>
-      <detection_angle>120 degrees</detection_angle>
-      <notes>Allow 60 seconds warm-up time after power-on</notes>
+      <current>15mA (typical)</current>
+      <detection_range>2cm - 400cm</detection_range>
+      <detection_angle>15 degrees</detection_angle>
+      <notes>Primary and only motion detection sensor - measures distance changes</notes>
     </component>
     
     <component id="2">
-      <name>Status LED</name>
+      <n>Status LED</n>
       <type>3mm LED</type>
       <color>Any (Green recommended)</color>
       <forward_voltage>2.0V (typical)</forward_voltage>
@@ -36,7 +36,7 @@
     </component>
     
     <component id="3">
-      <name>Alarm LED</name>
+      <n>Alarm LED</n>
       <type>5mm LED</type>
       <color>Red recommended</color>
       <forward_voltage>2.0V (typical)</forward_voltage>
@@ -45,7 +45,7 @@
     </component>
     
     <component id="4">
-      <name>Piezo Buzzer</name>
+      <n>Piezo Buzzer</n>
       <type>Active Buzzer</type>
       <voltage>5V DC</voltage>
       <current>30mA (typical)</current>
@@ -54,7 +54,7 @@
     </component>
     
     <component id="5">
-      <name>Resistor (Status LED)</name>
+      <n>Resistor (Status LED)</n>
       <type>Through-hole resistor</type>
       <value>220Ω</value>
       <tolerance>5%</tolerance>
@@ -63,7 +63,7 @@
     </component>
     
     <component id="6">
-      <name>Resistor (Alarm LED)</name>
+      <n>Resistor (Alarm LED)</n>
       <type>Through-hole resistor</type>
       <value>220Ω</value>
       <tolerance>5%</tolerance>
@@ -73,10 +73,10 @@
   </components>
   
   <connections>
-    <!-- PIR Motion Sensor -->
+    <!-- HC-SR04 Ultrasonic Sensor (Only Motion Detection) -->
     <connection id="1">
       <from>
-        <component>PIR Sensor</component>
+        <component>HC-SR04 Ultrasonic</component>
         <pin>VCC</pin>
       </from>
       <to>
@@ -90,7 +90,7 @@
     
     <connection id="2">
       <from>
-        <component>PIR Sensor</component>
+        <component>HC-SR04 Ultrasonic</component>
         <pin>GND</pin>
       </from>
       <to>
@@ -104,22 +104,38 @@
     
     <connection id="3">
       <from>
-        <component>PIR Sensor</component>
-        <pin>OUT</pin>
+        <component>HC-SR04 Ultrasonic</component>
+        <pin>TRIG</pin>
       </from>
       <to>
         <component>Arduino R4 WiFi</component>
-        <pin>D2</pin>
+        <pin>D3</pin>
       </to>
-      <wire_color>Yellow</wire_color>
+      <wire_color>Blue</wire_color>
+      <signal>Digital Output</signal>
+      <voltage>0V/5V (logic level)</voltage>
+      <direction>Output</direction>
+      <notes>Triggers ultrasonic pulse</notes>
+    </connection>
+    
+    <connection id="4">
+      <from>
+        <component>HC-SR04 Ultrasonic</component>
+        <pin>ECHO</pin>
+      </from>
+      <to>
+        <component>Arduino R4 WiFi</component>
+        <pin>D4</pin>
+      </to>
+      <wire_color>Purple</wire_color>
       <signal>Digital Input</signal>
       <voltage>0V/5V (logic level)</voltage>
       <direction>Input</direction>
-      <notes>HIGH when motion detected</notes>
+      <notes>Receives echo pulse for distance measurement</notes>
     </connection>
     
     <!-- Status LED (3mm) -->
-    <connection id="4">
+    <connection id="5">
       <from>
         <component>Arduino R4 WiFi</component>
         <pin>D8</pin>
@@ -134,7 +150,7 @@
       <direction>Output</direction>
     </connection>
     
-    <connection id="5">
+    <connection id="6">
       <from>
         <component>Resistor 220Ω (Status)</component>
         <pin>2</pin>
@@ -148,7 +164,7 @@
       <current>~13.6mA</current>
     </connection>
     
-    <connection id="6">
+    <connection id="7">
       <from>
         <component>Status LED</component>
         <pin>Cathode (-)</pin>
@@ -163,7 +179,7 @@
     </connection>
     
     <!-- Alarm LED (5mm) -->
-    <connection id="7">
+    <connection id="8">
       <from>
         <component>Arduino R4 WiFi</component>
         <pin>D9</pin>
@@ -178,7 +194,7 @@
       <direction>Output</direction>
     </connection>
     
-    <connection id="8">
+    <connection id="9">
       <from>
         <component>Resistor 220Ω (Alarm)</component>
         <pin>2</pin>
@@ -192,7 +208,7 @@
       <current>~13.6mA</current>
     </connection>
     
-    <connection id="9">
+    <connection id="10">
       <from>
         <component>Alarm LED</component>
         <pin>Cathode (-)</pin>
@@ -207,7 +223,7 @@
     </connection>
     
     <!-- Piezo Buzzer -->
-    <connection id="10">
+    <connection id="11">
       <from>
         <component>Arduino R4 WiFi</component>
         <pin>D10</pin>
@@ -216,14 +232,14 @@
         <component>Piezo Buzzer</component>
         <pin>Positive (+)</pin>
       </to>
-      <wire_color>Blue</wire_color>
+      <wire_color>White</wire_color>
       <signal>Digital Output</signal>
       <voltage>0V/5V (logic level)</voltage>
       <direction>Output</direction>
       <notes>Pulsing pattern: 500ms on/off</notes>
     </connection>
     
-    <connection id="11">
+    <connection id="12">
       <from>
         <component>Piezo Buzzer</component>
         <pin>Negative (-)</pin>
@@ -239,24 +255,26 @@
   </connections>
   
   <pin_summary>
-    <pin name="D2" type="INPUT" function="PIR Motion Sensor Output" />
+    <pin name="D3" type="OUTPUT" function="Ultrasonic TRIG (Trigger pulse)" />
+    <pin name="D4" type="INPUT" function="Ultrasonic ECHO (Distance measurement)" />
     <pin name="D8" type="OUTPUT" function="Status LED Control (via 220Ω)" />
     <pin name="D9" type="OUTPUT" function="Alarm LED Control (via 220Ω)" />
     <pin name="D10" type="OUTPUT" function="Buzzer Control" />
     <pin name="5V" type="POWER" function="Power Supply for all components" />
     <pin name="GND" type="GROUND" function="Common ground for all components" />
+    <pin name="D2" type="UNUSED" function="Available for future expansion" />
   </pin_summary>
   
   <power_analysis>
     <total_current>
-      <maximum>108.2mA</maximum>
-      <typical>65mA</typical>
-      <notes>Assumes all outputs active simultaneously</notes>
+      <maximum>58.2mA</maximum>
+      <typical>42mA</typical>
+      <notes>Assumes all outputs active simultaneously - PIR removed</notes>
     </total_current>
     
     <breakdown>
-      <component name="PIR Sensor">
-        <current>65mA</current>
+      <component name="HC-SR04 Ultrasonic">
+        <current>15mA</current>
         <notes>Typical operating current</notes>
       </component>
       <component name="Status LED">
@@ -273,6 +291,12 @@
       </component>
     </breakdown>
     
+    <comparison>
+      <previous_version>v1.1 with PIR: 123.2mA max</previous_version>
+      <current_version>v1.2 ultrasonic only: 58.2mA max</current_version>
+      <savings>65mA reduction (53% less power consumption)</savings>
+    </comparison>
+    
     <gpio_current>
       <total>57.2mA</total>
       <per_pin_limit>8mA (recommended), 20mA (absolute max)</per_pin_limit>
@@ -281,15 +305,54 @@
     </gpio_current>
   </power_analysis>
   
+  <detection_system>
+    <sensor>
+      <n>HC-SR04 Ultrasonic</n>
+      <method>Distance-based motion detection</method>
+      <advantages>
+        - No heat sensitivity (eliminates PIR false alarms)
+        - Measures actual distance changes
+        - More reliable for indoor use
+        - Adjustable detection range and sensitivity
+        - Simpler system with single sensor
+        - Lower power consumption
+      </advantages>
+      <configuration>
+        - Detection range: 150cm (configurable)
+        - Movement threshold: 30cm change (configurable)
+        - Check interval: 500ms
+      </configuration>
+    </sensor>
+    
+    <detection_logic>
+      System arms with ultrasonic baseline measurement.
+      Continuously monitors for distance changes when ARMED.
+      Triggers alarm when distance change exceeds threshold.
+      No backup sensor - simplified, reliable detection.
+    </detection_logic>
+    
+    <why_no_pir>
+      PIR sensor removed in v1.2 due to:
+      - Frequent false alarms from heat sources
+      - Sensitivity to sunlight and temperature changes
+      - Required constant calibration and adjustment
+      - Added complexity without significant benefit
+      Ultrasonic sensor alone provides superior reliability.
+    </why_no_pir>
+  </detection_system>
+  
   <assembly_notes>
     <note priority="high">
       Verify LED polarity before connecting. Longer leg is anode (+), shorter leg is cathode (-).
     </note>
     <note priority="high">
-      Ensure PIR sensor is properly oriented. The sensor dome should face the detection area.
+      Point HC-SR04 ultrasonic sensor toward main detection area (room entrance).
     </note>
     <note priority="medium">
-      PIR sensor requires 60 seconds to stabilize after power-on before reliable detection.
+      Keep ultrasonic sensor clear of obstacles - nothing should block TRIG/ECHO cylinders.
+    </note>
+    <note priority="medium">
+      Mount sensor level (not tilted) for accurate distance measurements.
     </note>
     <note priority="medium">
       Active buzzer has polarity. Connect positive terminal to D10, negative to GND.
@@ -299,6 +362,9 @@
     </note>
     <note priority="low">
       Consider using a breadboard for initial prototyping before permanent installation.
+    </note>
+    <note priority="info">
+      Pin D2 is now unused and available for future expansion (v1.1 used it for PIR).
     </note>
   </assembly_notes>
   
@@ -319,21 +385,78 @@
       Verify WiFi connection and note IP address
     </step>
     <step number="6">
-      Test Status LED by arming system via web interface
+      ARM system via web interface - note baseline distance in Serial Monitor
     </step>
     <step number="7">
-      Wait 60 seconds for PIR sensor stabilization
+      Test ultrasonic: Move hand slowly in front of sensor (within 1.5m)
     </step>
     <step number="8">
-      Trigger PIR sensor with hand motion
-    </step>
-    <step number="9">
       Verify Alarm LED and Buzzer activate
     </step>
-    <step number="10">
+    <step number="9">
       Disarm system via web interface to stop alarm
     </step>
+    <step number="10">
+      Test from different distances and angles to verify coverage
+    </step>
   </testing_procedure>
+  
+  <tuning_parameters>
+    <ultrasonic>
+      <parameter name="DETECTION_DISTANCE">
+        <default>150</default>
+        <unit>centimeters</unit>
+        <description>Maximum range for detection (default 150cm = 5 feet)</description>
+        <tuning>Decrease for smaller rooms (e.g., 100cm), increase for larger spaces (e.g., 200cm)</tuning>
+      </parameter>
+      <parameter name="DISTANCE_CHANGE_THRESHOLD">
+        <default>30</default>
+        <unit>centimeters</unit>
+        <description>Minimum distance change to trigger (default 30cm)</description>
+        <tuning>Increase to reduce sensitivity (e.g., 50cm), decrease for more sensitive detection (e.g., 20cm)</tuning>
+      </parameter>
+      <parameter name="DISTANCE_CHECK_INTERVAL">
+        <default>500</default>
+        <unit>milliseconds</unit>
+        <description>How often to check distance (default 500ms)</description>
+        <tuning>Lower values = faster response but more processing (e.g., 250ms), higher = less frequent checks (e.g., 1000ms)</tuning>
+      </parameter>
+    </ultrasonic>
+  </tuning_parameters>
+  
+  <troubleshooting>
+    <issue>
+      <problem>Ultrasonic sensor not detecting</problem>
+      <solutions>
+        - Verify TRIG on D3 and ECHO on D4
+        - Ensure 5V power to sensor
+        - Check Serial Monitor for baseline distance when arming
+        - Point sensor toward open space (not wall or obstacle)
+        - Adjust DETECTION_DISTANCE or DISTANCE_CHANGE_THRESHOLD
+        - Ensure nothing is blocking the sensor cylinders
+      </solutions>
+    </issue>
+    
+    <issue>
+      <problem>Too many false alarms</problem>
+      <solutions>
+        - Increase DISTANCE_CHANGE_THRESHOLD (e.g., 50cm)
+        - Point sensor away from curtains, fans, or moving objects
+        - Secure sensor mounting to prevent vibrations
+        - Decrease DETECTION_DISTANCE to reduce range
+      </solutions>
+    </issue>
+    
+    <issue>
+      <problem>Sensor misses motion</problem>
+      <solutions>
+        - Decrease DISTANCE_CHANGE_THRESHOLD for more sensitivity
+        - Increase DETECTION_DISTANCE for longer range
+        - Ensure sensor is pointed at main traffic area
+        - Check that movement is within sensor's 15-degree cone
+      </solutions>
+    </issue>
+  </troubleshooting>
   
   <safety_warnings>
     <warning type="electrical">
@@ -345,15 +468,40 @@
     <warning type="electrical">
       Never connect components directly to mains voltage. System operates at 5V DC only.
     </warning>
-    <warning type="mechanical">
-      PIR sensor contains a Fresnel lens. Handle carefully to avoid damage.
-    </warning>
     <warning type="operational">
       This is an educational/demonstration project. Not suitable for critical security applications.
     </warning>
+    <warning type="operational">
+      Ultrasonic sensor has narrow 15-degree detection angle - position carefully for full room coverage.
+    </warning>
   </safety_warnings>
   
+  <advantages_v1_2>
+    <advantage>Simpler wiring (4 fewer connections than v1.1)</advantage>
+    <advantage>Lower cost (~$3 savings without PIR)</advantage>
+    <advantage>53% less power consumption (58mA vs 123mA)</advantage>
+    <advantage>No heat-based false alarms</advantage>
+    <advantage>Easier troubleshooting (single sensor)</advantage>
+    <advantage>More reliable detection</advantage>
+    <advantage>No PIR warm-up wait time</advantage>
+    <advantage>Cleaner, more maintainable code</advantage>
+  </advantages_v1_2>
+  
   <revision_history>
+    <revision version="1.2" date="2026-01-31">
+      MAJOR CHANGE: Removed PIR sensor - ultrasonic only system
+      Simplified to single-sensor architecture
+      Reduced component count from 7 to 6
+      Lower power consumption (58mA vs 123mA)
+      Cleaner code without PIR debouncing logic
+      Pin D2 now available for future expansion
+    </revision>
+    <revision version="1.1" date="2026-01-31">
+      Added HC-SR04 ultrasonic sensor as primary motion detection
+      PIR sensor as backup with smart filtering
+      Dual-sensor architecture for improved reliability
+      AJAX-powered web interface
+    </revision>
     <revision version="1.0" date="2026-01-30">
       Initial release - Basic security system with PIR, LEDs, buzzer, and web interface
     </revision>
