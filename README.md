@@ -31,7 +31,9 @@ The system is designed for educational purposes and rapid prototyping, demonstra
 
 ## ✨ Features
 
-- **PIR Motion Detection**: Automatic intrusion detection using passive infrared sensor
+- **Ultrasonic Motion Detection**: HC-SR04 distance-based detection (no heat false alarms!)
+- **Smart Distance Monitoring**: Detects actual movement by measuring distance changes
+- **Configurable Sensitivity**: Adjustable detection range and movement threshold
 - **Visual Indicators**: Dual LED system for status and alarm indication
 - **Audible Alerts**: Piezoelectric buzzer with pulsing alarm pattern
 - **Web Interface**: Responsive HTML interface for remote monitoring and control
@@ -40,7 +42,7 @@ The system is designed for educational purposes and rapid prototyping, demonstra
 - **REST API**: JSON endpoints for programmatic control
 - **State Machine Logic**: Three-state system (DISARMED, ARMED, ALARM_TRIGGERED)
 - **Persistent Alarms**: Alarm continues until manually disarmed via web interface
-- **Real-time Updates**: Auto-refreshing web dashboard
+- **Real-time Updates**: AJAX-powered dashboard with no page reloads
 
 ## 🛠️ Hardware Requirements
 
@@ -49,7 +51,7 @@ The system is designed for educational purposes and rapid prototyping, demonstra
 | Component | Quantity | Specifications |
 |-----------|----------|----------------|
 | Arduino R4 WiFi | 1 | Main controller with WiFi capability |
-| PIR Motion Sensor | 1 | HC-SR501 or compatible (5V) |
+| HC-SR04 Ultrasonic Sensor | 1 | Distance-based motion detection |
 | LED (3mm) | 1 | Status indicator (any color) |
 | LED (5mm) | 1 | Alarm indicator (red recommended) |
 | Active Piezo Buzzer | 1 | 5V active buzzer |
@@ -60,14 +62,15 @@ The system is designed for educational purposes and rapid prototyping, demonstra
 
 ### Estimated Cost
 
-- **Without Arduino**: $10-25 USD
-- **Complete Kit**: $45-75 USD (including Arduino R4 WiFi)
+- **Without Arduino**: $8-22 USD
+- **Complete Kit**: $40-50 USD (including Arduino R4 WiFi)
 
 ## 📌 Pin Configuration
 
 | Function | Arduino Pin | Component | Notes |
 |----------|-------------|-----------|-------|
-| Motion Input | D2 | PIR Sensor Output | Digital input |
+| Ultrasonic Trigger | D3 | HC-SR04 TRIG | Motion detection sensor |
+| Ultrasonic Echo | D4 | HC-SR04 ECHO | Motion detection sensor |
 | Status LED | D8 | 3mm LED (+ 220Ω resistor) | Active when ARMED |
 | Alarm LED | D9 | 5mm LED (+ 220Ω resistor) | Active during ALARM |
 | Buzzer | D10 | Active Piezo Buzzer | Pulsing pattern |
@@ -102,7 +105,7 @@ The system is designed for educational purposes and rapid prototyping, demonstra
 
 1. **Clone or download** this repository
    ```bash
-   git clone https://github.com/DantesPrograms/arduino-security-system.git
+   git clone https://github.com/yourusername/arduino-security-system.git
    cd arduino-security-system
    ```
 
@@ -176,7 +179,7 @@ System State: DISARMED
 ### Web Interface Access
 
 1. Open browser and go to `http://[ARDUINO_IP_ADDRESS]`
-2. Enter PIN: **1234** (or your custom PIN)
+2. Enter PIN: **0421** (or your custom PIN)
 3. Click **UNLOCK** to access controls
 
 ### Operating the System
@@ -185,13 +188,15 @@ System State: DISARMED
 1. Login to web interface
 2. Click **ARM SYSTEM** button
 3. Status LED will illuminate
-4. PIR sensor is now monitoring for motion
+4. Ultrasonic sensor sets baseline distance
+5. System now monitoring for motion
 
 #### When Motion is Detected:
+- Distance change detected by ultrasonic sensor
 - Alarm LED activates
 - Buzzer sounds with pulsing pattern (500ms intervals)
 - Alarm continues indefinitely until disarmed
-- Web interface shows "⚠️ ALARM TRIGGERED ⚠️"
+- Web interface shows "ALARM ACTIVE" in red
 
 #### To Disarm the System:
 1. Login to web interface (if not already)
@@ -289,17 +294,31 @@ curl -X POST http://192.168.1.150/disarm --cookie "session=YOUR_SESSION_TOKEN"
 - Try moving Arduino closer to router
 - Check for special characters in WiFi credentials
 
-### PIR Sensor Not Detecting
+### Motion Sensor Issues
 
 **Problem**: No alarm when motion occurs
 
-**Solutions**:
+**Solutions for Ultrasonic Sensor**:
 - Verify system is ARMED (status LED should be on)
-- Check PIR sensor connections (power, ground, signal)
-- Adjust PIR sensor sensitivity potentiometer
-- Ensure PIR sensor has warmed up (60 second stabilization)
-- Test PIR by monitoring D2 pin in serial monitor
-- Verify PIR sensor voltage (should be 5V)
+- Check ultrasonic connections (TRIG to D3, ECHO to D4)
+- Ensure sensor is pointed toward detection area
+- Check Serial Monitor for baseline distance when arming
+- Adjust `DETECTION_DISTANCE` in code (default 150cm / 5 feet)
+- Adjust `DISTANCE_CHANGE_THRESHOLD` in code (default 30cm)
+- Verify 5V power to ultrasonic sensor
+- Ensure nothing is blocking the sensor
+
+### Too Many False Alarms
+
+**Problem**: System triggers when no one is there
+
+**Solutions**:
+- Increase `DISTANCE_CHANGE_THRESHOLD` (e.g., from 30cm to 50cm)
+- Decrease `DETECTION_DISTANCE` to reduce range
+- Point sensor away from moving objects (curtains, fans, pets)
+- Check for obstacles that might sway or move
+- Avoid pointing at windows or doors that may shift
+- Ensure sensor is mounted securely (vibrations can cause false triggers)
 
 ### Web Interface Not Loading
 
@@ -426,4 +445,4 @@ For issues, questions, or suggestions:
 
 **⚡ Built with Arduino R4 WiFi | 🔒 Secure by Design | 🌐 IoT Ready**
 
-*Last Updated: January 30, 2026*
+*Last Updated: Febuary 1st, 2026*
