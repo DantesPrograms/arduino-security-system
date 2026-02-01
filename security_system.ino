@@ -23,10 +23,21 @@ const char* password = "YOUR_WIFI_PASSWORD";
 const String SECURITY_PIN = "1234";
 
 // Pin Definitions
-const int PIR_PIN = 2;
+// const int PIR_PIN = 2;  // Not used - ultrasonic only
 const int STATUS_LED_PIN = 8;
 const int ALARM_LED_PIN = 9;
 const int BUZZER_PIN = 10;
+
+// Ultrasonic Sensor Pins (HC-SR04)
+const int TRIG_PIN = 3;  // Trigger pin
+const int ECHO_PIN = 4;  // Echo pin
+
+// Ultrasonic Detection Settings
+const int DETECTION_DISTANCE = 150;  // Trigger if something within 150cm (1.5m)
+const int DISTANCE_CHANGE_THRESHOLD = 30; // 30cm movement threshold
+int baselineDistance = 0;  // Store baseline distance when armed
+unsigned long lastDistanceCheck = 0;
+const unsigned long DISTANCE_CHECK_INTERVAL = 500; // Check every 500ms
 
 // ==================== SYSTEM STATES ====================
 enum SystemState {
@@ -56,7 +67,8 @@ void setup() {
   Serial.println("\n=== Arduino R4 WiFi Security System ===");
   
   // Initialize GPIO pins
-  pinMode(PIR_PIN, INPUT);
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
   pinMode(STATUS_LED_PIN, OUTPUT);
   pinMode(ALARM_LED_PIN, OUTPUT);
   pinMode(BUZZER_PIN, OUTPUT);
@@ -100,6 +112,65 @@ void loop() {
   delay(100); // Small delay to prevent CPU overload
 }
 
+// ==================== ULTRASONIC SENSOR FUNCTIONS ====================
+int getDistance() {
+  // Send ultrasonic pulse
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+  
+  // Read echo pulse
+  long duration = pulseIn(ECHO_PIN, HIGH, 30000); // 30ms timeout
+  
+  // Calculate distance in cm (duration/2 because sound travels there and back)
+  int distance = duration * 0.034 / 2;
+  
+  // Return 0 if no echo or out of range
+  if (distance == 0 || distance > 400) {
+    return 0;
+  }
+  
+  return distance;
+}
+
+bool checkUltrasonicMotion() {
+  unsigned long currentTime = millis();
+  
+  // Only check at intervals to avoid constant pinging
+  if (currentTime - lastDistanceCheck < DISTANCE_CHECK_INTERVAL) {
+    return false;
+  }
+  
+  lastDistanceCheck = currentTime;
+  int currentDistance = getDistance();
+  
+  // Skip if invalid reading
+  if (currentDistance == 0) {
+    return false;
+  }
+  
+  // Check if something is within detection range
+  if (currentDistance < DETECTION_DISTANCE) {
+    // Check if distance changed significantly from baseline
+    int distanceChange = abs(currentDistance - baselineDistance);
+    
+    if (distanceChange > DISTANCE_CHANGE_THRESHOLD) {
+      Serial.print("ULTRASONIC: Movement detected! Distance change: ");
+      Serial.print(distanceChange);
+      Serial.print("cm (baseline: ");
+      Serial.print(baselineDistance);
+      Serial.print("cm, current: ");
+      Serial.print(currentDistance);
+      Serial.println("cm)");
+      return true;
+    }
+  }
+  
+  return false;
+}
+
 // ==================== STATE HANDLERS ====================
 void handleDisarmedState() {
   digitalWrite(STATUS_LED_PIN, LOW);
@@ -112,13 +183,16 @@ void handleArmedState() {
   digitalWrite(ALARM_LED_PIN, LOW);
   digitalWrite(BUZZER_PIN, LOW);
   
-  // Check PIR sensor
-  int pirValue = digitalRead(PIR_PIN);
-  if (pirValue == HIGH) {
+  unsigned long currentTime = millis();
+  
+  // Check ultrasonic sensor for motion
+  if (checkUltrasonicMotion()) {
     motionDetected = true;
-    lastMotionTime = millis();
+    lastMotionTime = currentTime;
     currentState = ALARM_TRIGGERED;
-    Serial.println("MOTION DETECTED! Alarm triggered.");
+    Serial.println("========================================");
+    Serial.println("ALARM TRIGGERED - MOTION DETECTED!");
+    Serial.println("========================================");
   }
 }
 
@@ -488,10 +562,12 @@ void serveWebPage(WiFiClient& client) {
   
   // System info grid
   html += "<div class='info-grid'>";
-  html += "<div class='info-item'><div class='info-label'>PIR Sensor</div><div class='info-value'>Pin D2</div></div>";
+  html += "<div class='info-item'><div class='info-label'>Ultrasonic TRIG</div><div class='info-value'>Pin D3</div></div>";
+  html += "<div class='info-item'><div class='info-label'>Ultrasonic ECHO</div><div class='info-value'>Pin D4</div></div>";
   html += "<div class='info-item'><div class='info-label'>Status LED</div><div class='info-value'>Pin D8</div></div>";
   html += "<div class='info-item'><div class='info-label'>Alarm LED</div><div class='info-value'>Pin D9</div></div>";
   html += "<div class='info-item'><div class='info-label'>Buzzer</div><div class='info-value'>Pin D10</div></div>";
+  html += "<div class='info-item'><div class='info-label'>Detection</div><div class='info-value'>Distance</div></div>";
   html += "</div>";
   
   html += "<div class='divider'></div>";
@@ -574,7 +650,17 @@ void serveStatus(WiFiClient& client) {
 
 void armSystem(WiFiClient& client) {
   currentState = ARMED;
-  Serial.println("System ARMED via web interface");
+  
+  // Set baseline distance for ultrasonic sensor
+  delay(100); // Small delay to let sensor stabilize
+  baselineDistance = getDistance();
+  if (baselineDistance == 0) {
+    baselineDistance = 200; // Default baseline if no reading
+  }
+  
+  Serial.print("System ARMED via web interface - Baseline distance: ");
+  Serial.print(baselineDistance);
+  Serial.println("cm");
   
   String response = "HTTP/1.1 303 See Other\r\n";
   response += "Location: /\r\n";
