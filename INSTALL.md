@@ -19,7 +19,7 @@ Complete step-by-step installation instructions for the Arduino R4 WiFi Security
 | Item | Specification | Where to Buy |
 |------|--------------|--------------|
 | Arduino UNO R4 WiFi | Official board | Arduino.cc, Amazon, DigiKey |
-| PIR Motion Sensor | HC-SR501 (5V) | Amazon, AliExpress, SparkFun |
+| HC-SR04 Ultrasonic Sensor | 5V distance sensor | Amazon, AliExpress, SparkFun |
 | LED 3mm | Any color, recommend green | Any electronics supplier |
 | LED 5mm | Red recommended | Any electronics supplier |
 | Active Buzzer | 5V active type | Amazon, AliExpress |
@@ -28,7 +28,7 @@ Complete step-by-step installation instructions for the Arduino R4 WiFi Security
 | USB-C Cable | Data cable (not charge-only) | Any electronics supplier |
 | Breadboard | 830 tie-points (optional) | Any electronics supplier |
 
-**Total Estimated Cost**: $45-75 USD (including Arduino)
+**Total Estimated Cost**: $40-50 USD (including Arduino)
 
 ### Required Software
 
@@ -60,7 +60,7 @@ Lay out all components and verify you have everything:
 
 ```
 ✓ Arduino R4 WiFi
-✓ PIR Sensor (has 3 pins: VCC, OUT, GND)
+✓ HC-SR04 Ultrasonic Sensor (has 4 pins: VCC, TRIG, ECHO, GND)
 ✓ LED 3mm (longer leg is +, shorter is -)
 ✓ LED 5mm (longer leg is +, shorter is -)
 ✓ Buzzer (marked + and -, or red/black wires)
@@ -82,22 +82,30 @@ If using a breadboard:
 1. Connect Arduino **5V** to breadboard power rail (+)
 2. Connect Arduino **GND** to breadboard ground rail (-)
 
-### Step 4: Connect PIR Sensor
+### Step 4: Connect HC-SR04 Ultrasonic Sensor
 
-PIR sensors typically have 3 pins (some have adjustment pots on back):
+The ultrasonic sensor has 4 pins:
 
 ```
-PIR Sensor          Arduino R4 WiFi
-----------          ---------------
-VCC (or +)    -->   5V
-GND (or -)    -->   GND
-OUT           -->   D2
+HC-SR04          Arduino R4 WiFi
+-------          ---------------
+VCC        -->   5V
+TRIG       -->   D3
+ECHO       -->   D4
+GND        -->   GND
 ```
+
+**Detailed Steps:**
+1. Connect VCC to 5V power rail
+2. Connect GND to ground rail
+3. Connect TRIG to Arduino pin D3
+4. Connect ECHO to Arduino pin D4
 
 **Tips:**
-- PIR sensor dome should face outward
-- Keep away from heat sources
-- Adjustment pots (if present): Set both to middle position initially
+- Point the sensor toward the room entrance/main detection area
+- Keep the sensor level (not tilted)
+- Ensure nothing blocks the sensor's "eyes" (the two metal cylinders)
+- This is your primary and only motion detection sensor!
 
 ### Step 5: Connect Status LED (3mm)
 
@@ -150,9 +158,10 @@ Buzzer            Arduino R4 WiFi
 
 | Component | Pin/Wire | Arduino Pin |
 |-----------|----------|-------------|
-| PIR VCC | Power | 5V |
-| PIR GND | Ground | GND |
-| PIR OUT | Signal | D2 |
+| Ultrasonic VCC | Power | 5V |
+| Ultrasonic GND | Ground | GND |
+| Ultrasonic TRIG | Signal | D3 |
+| Ultrasonic ECHO | Signal | D4 |
 | Status LED + | Via 220Ω | D8 |
 | Status LED - | Direct | GND |
 | Alarm LED + | Via 220Ω | D9 |
@@ -262,16 +271,16 @@ const char* password = "MyWiFiPassword123"; // Your WiFi password
 
 ### Step 2: Configure PIN (Optional)
 
-Default PIN is **1234**. To change:
+Default PIN is **0421**. To change:
 
 ```cpp
 // Security PIN
-const String SECURITY_PIN = "1234";  // Change to your desired PIN
+const String SECURITY_PIN = "0421";  // Change to your desired PIN
 ```
 
 Example:
 ```cpp
-const String SECURITY_PIN = "9086";  // Your custom PIN
+const String SECURITY_PIN = "1234";  // Your custom PIN
 ```
 
 **PIN Requirements:**
@@ -569,4 +578,3 @@ After successful installation:
 **Congratulations on completing the installation!** 🎉
 
 *Last Updated: January 30, 2026*
-
