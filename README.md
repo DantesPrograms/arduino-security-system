@@ -8,7 +8,6 @@ A network-enabled security system with PIR motion detection, web-based control, 
 
 ## 📋 Table of Contents
 
-
 - [Overview](#overview)
 - [Features](#features)
 - [Hardware Requirements](#hardware-requirements)
