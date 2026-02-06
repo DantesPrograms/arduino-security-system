@@ -63,8 +63,8 @@ unsigned long lastMotionTime = 0;
 bool doorbellPressed = false;
 unsigned long doorbellPressTime = 0;
 const unsigned long DOORBELL_MESSAGE_DURATION = 120000; // 2 minutes in milliseconds
-bool doorbellButtonState = LOW;  // Debounced button state
-bool lastButtonState = LOW;  // Raw reading for debounce timing
+bool doorbellButtonState = HIGH;  // Debounced button state (HIGH = not pressed with INPUT_PULLUP)
+bool lastButtonState = HIGH;  // Raw reading for debounce timing (HIGH = not pressed with INPUT_PULLUP)
 unsigned long lastDebounceTime = 0;
 const unsigned long DEBOUNCE_DELAY = 50;  // 50ms debounce
 
@@ -89,7 +89,7 @@ void setup() {
   pinMode(BUZZER_PIN, OUTPUT);
   
   // Doorbell pins
-  pinMode(DOORBELL_BUTTON_PIN, INPUT);  // Regular input - button connects D11 to 5V when pressed
+  pinMode(DOORBELL_BUTTON_PIN, INPUT_PULLUP);  // Internal pull-up: reads HIGH when open, LOW when button connects D11 to GND
   pinMode(DOORBELL_BUZZER_PIN, OUTPUT);
   
   // Ensure all outputs are off at startup
@@ -155,8 +155,8 @@ void checkDoorbellButton() {
     if (reading != doorbellButtonState) {
       doorbellButtonState = reading;
       
-      // Trigger on rising edge (button pressed with pulldown resistor)
-      if (doorbellButtonState == HIGH) {
+      // Trigger on falling edge (button pressed pulls to GND with INPUT_PULLUP)
+      if (doorbellButtonState == LOW) {
         Serial.println("DOORBELL: Button pressed!");
         playDoorbellSound();
         doorbellPressed = true;
@@ -687,7 +687,7 @@ void serveWebPage(WiFiClient& client) {
   html += "msg.style.fontWeight='600';";
   html += "}";
   html += "if(data.doorbell){";
-  html += "doorbell.innerHTML='<div class=\\'doorbell-notification\\'><div class=\\'doorbell-icon\\'>🔔</div><div>Someone is at your door!</div></div>';";
+  html += "doorbell.innerHTML=\"<div class='doorbell-notification'><div class='doorbell-icon'>&#128276;</div><div>Someone is at your door!</div></div>\";";
   html += "doorbell.style.display='block';";
   html += "}else{";
   html += "doorbell.style.display='none';";
