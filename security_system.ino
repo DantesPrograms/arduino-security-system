@@ -1,16 +1,18 @@
-/* 
-* Arduino R4 WiFi Security System 
-* PIR Motion Detection with Web-Controlled Arm/Disarm 
-* 
-* Author: Dante D'Abramo 
-* Date: 2026-02-01 
-* 
-* Hardware Connections: 
-* - PIR Sensor Output: D2 - Not used 
-* - ECHO Pin: 4 * - TRIG Pin: 3 
-* - Status LED (3mm): D8 * - Alarm LED (5mm): D9 
-* - Piezo Buzzer: D10 
-*/
+/*
+ * Arduino R4 WiFi Security System
+ * PIR Motion Detection with Web-Controlled Arm/Disarm
+ * 
+ * Author: Dante D'Abramo
+ * Date: 2026-01-30
+ * 
+ * Hardware Connections:
+ * - PIR Sensor Output: D2 - Not used
+ * - ECHO Pin: 4 * - TRIG Pin: 3
+ * - Status LED (3mm): D8 * - Alarm LED (5mm): D9
+ * - Piezo Buzzer: D10
+ * - Doorbell Button: D11
+ * - Doorbell Buzzer: D12
+ */
 
 #include <WiFiS3.h>
 
@@ -27,6 +29,10 @@ const String SECURITY_PIN = "0421";
 const int STATUS_LED_PIN = 8;
 const int ALARM_LED_PIN = 9;
 const int BUZZER_PIN = 10;
+
+// Doorbell Pins
+const int DOORBELL_BUTTON_PIN = 11;  // Button input
+const int DOORBELL_BUZZER_PIN = 12;  // Passive buzzer for doorbell
 
 // Ultrasonic Sensor Pins (HC-SR04)
 const int TRIG_PIN = 3;  // Trigger pin
@@ -53,6 +59,15 @@ WiFiServer server(80);
 bool motionDetected = false;
 unsigned long lastMotionTime = 0;
 
+// Doorbell globals
+bool doorbellPressed = false;
+unsigned long doorbellPressTime = 0;
+const unsigned long DOORBELL_MESSAGE_DURATION = 120000; // 2 minutes in milliseconds
+bool doorbellButtonState = LOW;  // Debounced button state
+bool lastButtonState = LOW;  // Raw reading for debounce timing
+unsigned long lastDebounceTime = 0;
+const unsigned long DEBOUNCE_DELAY = 50;  // 50ms debounce
+
 // Session management
 String authenticatedSession = "";
 unsigned long sessionStartTime = 0;
@@ -73,10 +88,15 @@ void setup() {
   pinMode(ALARM_LED_PIN, OUTPUT);
   pinMode(BUZZER_PIN, OUTPUT);
   
+  // Doorbell pins
+  pinMode(DOORBELL_BUTTON_PIN, INPUT);  // Regular input - button connects D11 to 5V when pressed
+  pinMode(DOORBELL_BUZZER_PIN, OUTPUT);
+  
   // Ensure all outputs are off at startup
   digitalWrite(STATUS_LED_PIN, LOW);
   digitalWrite(ALARM_LED_PIN, LOW);
   digitalWrite(BUZZER_PIN, LOW);
+  digitalWrite(DOORBELL_BUZZER_PIN, LOW);
   
   Serial.println("Hardware initialized - System DISARMED");
   
@@ -109,7 +129,59 @@ void loop() {
       break;
   }
   
+  // Check doorbell button (works in all states)
+  checkDoorbellButton();
+  
+  // Clear doorbell message after 2 minutes
+  if (doorbellPressed && (millis() - doorbellPressTime > DOORBELL_MESSAGE_DURATION)) {
+    doorbellPressed = false;
+    Serial.println("Doorbell message cleared");
+  }
+  
   delay(100); // Small delay to prevent CPU overload
+}
+
+// ==================== DOORBELL FUNCTIONS ====================
+void checkDoorbellButton() {
+  int reading = digitalRead(DOORBELL_BUTTON_PIN);
+  
+  // Debounce the button: reset timer whenever the raw reading changes
+  if (reading != lastButtonState) {
+    lastDebounceTime = millis();
+  }
+  
+  if ((millis() - lastDebounceTime) > DEBOUNCE_DELAY) {
+    // Reading has been stable long enough - update debounced state
+    if (reading != doorbellButtonState) {
+      doorbellButtonState = reading;
+      
+      // Trigger on rising edge (button pressed with pulldown resistor)
+      if (doorbellButtonState == HIGH) {
+        Serial.println("DOORBELL: Button pressed!");
+        playDoorbellSound();
+        doorbellPressed = true;
+        doorbellPressTime = millis();
+      }
+    }
+  }
+  
+  lastButtonState = reading;
+}
+
+void playDoorbellSound() {
+  // Ding-Dong doorbell melody
+  // "Ding" - higher note
+  tone(DOORBELL_BUZZER_PIN, 1000, 200);  // 1000 Hz for 200ms
+  delay(200);
+  noTone(DOORBELL_BUZZER_PIN);
+  delay(50);
+  
+  // "Dong" - lower note
+  tone(DOORBELL_BUZZER_PIN, 800, 300);   // 800 Hz for 300ms
+  delay(300);
+  noTone(DOORBELL_BUZZER_PIN);
+  
+  Serial.println("DOORBELL: Ding-dong sound played");
 }
 
 // ==================== ULTRASONIC SENSOR FUNCTIONS ====================
@@ -539,6 +611,9 @@ void serveWebPage(WiFiClient& client) {
   html += ".divider{height:2px;background:linear-gradient(90deg,transparent,rgba(100,116,139,0.2),transparent);margin:25px 0;}";
   html += ".update-indicator{display:inline-block;width:8px;height:8px;background:#10b981;border-radius:50%;margin-left:8px;animation:blink 2s infinite;}";
   html += "@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}";
+  html += ".doorbell-notification{background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:white;padding:20px;border-radius:16px;margin-bottom:20px;text-align:center;font-size:18px;font-weight:600;box-shadow:0 8px 24px rgba(139,92,246,0.4);animation:slideDown 0.5s ease,pulse 2s infinite;}";
+  html += "@keyframes slideDown{from{opacity:0;transform:translateY(-20px);}to{opacity:1;transform:translateY(0);}}";
+  html += ".doorbell-icon{font-size:32px;margin-bottom:8px;}";
   html += "@media(max-width:640px){.controls{grid-template-columns:1fr;}.info-grid{grid-template-columns:1fr;}}";
   html += "</style></head><body>";
   html += "<div class='container'>";
@@ -546,6 +621,10 @@ void serveWebPage(WiFiClient& client) {
   html += "<h1>Security System</h1>";
   html += "<p>Real-time monitoring and control<span class='update-indicator'></span></p>";
   html += "</div>";
+  
+  // Doorbell notification (shown via AJAX when doorbell pressed)
+  html += "<div id='doorbellNotification' style='display:none;'></div>";
+  
   html += "<div class='card'>";
   
   // Status badge - will be updated via AJAX
@@ -588,6 +667,7 @@ void serveWebPage(WiFiClient& client) {
   html += "fetch('/status').then(r=>r.json()).then(data=>{";
   html += "const badge=document.getElementById('statusBadge');";
   html += "const msg=document.getElementById('statusMessage');";
+  html += "const doorbell=document.getElementById('doorbellNotification');";
   html += "badge.className='status-badge';";
   html += "if(data.state==='DISARMED'){";
   html += "badge.className+=' status-disarmed';";
@@ -605,6 +685,12 @@ void serveWebPage(WiFiClient& client) {
   html += "msg.textContent='Motion detected! Disarm to stop alarm';";
   html += "msg.style.color='#dc2626';";
   html += "msg.style.fontWeight='600';";
+  html += "}";
+  html += "if(data.doorbell){";
+  html += "doorbell.innerHTML='<div class=\\'doorbell-notification\\'><div class=\\'doorbell-icon\\'>🔔</div><div>Someone is at your door!</div></div>';";
+  html += "doorbell.style.display='block';";
+  html += "}else{";
+  html += "doorbell.style.display='none';";
   html += "}";
   html += "}).catch(e=>console.error('Update failed:',e));";
   html += "}";
@@ -643,6 +729,8 @@ void serveStatus(WiFiClient& client) {
   response += getStateString(currentState);
   response += "\",\"motion\":";
   response += motionDetected ? "true" : "false";
+  response += ",\"doorbell\":";
+  response += doorbellPressed ? "true" : "false";
   response += "}";
   
   client.print(response);
